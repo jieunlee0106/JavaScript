@@ -48,6 +48,7 @@ const buttonClickHandler = choice => event => {
   paperButton.disabled = true
 
   const cases = ['scissors', 'rock', 'paper']
+  // https://hianna.tistory.com/454
   const randomIndex = Math.floor(Math.random() * 3)
   
   const result = playGame(choice, cases[randomIndex])

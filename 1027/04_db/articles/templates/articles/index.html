@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>Articles</h1>
+  {% if request.user.is_authenticated %}
+    <a href="{% url 'articles:create' %}">CREATE</a>
+  {% endif %}
+  <hr>
+  {% for article in articles %}
+    <p>
+      <b>작성자 : <a href="{% url 'accounts:profile' article.user %}">{{ article.user }}</a></b>
+    </p>
+    <p>글 번호 : {{ article.pk }}</p>
+    <p>제목 : {{ article.title }}</p>
+    <p>내용 : {{ article.content }}</p>
+    <div>
+      <form class="like-form" data-article-id="{{ article.pk }}">
+        {% csrf_token %}
+        {% if request.user in article.like_users.all %}
+          <input type="submit" value="좋아요 취소">
+        {% else %}
+          <input type="submit" value="좋아요">
+        {% endif %}
+      </form>
+    </div>
+    <a href="{% url 'articles:detail' article.pk %}">상세 페이지</a>
+    <hr>
+  {% endfor %}
+{% endblock content %}
+
+
+{% block script %}
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+  const likeForms = document.querySelectorAll('.like-form') 
+  likeForms.forEach(form => {
+    form.addEventListener('submit', function (event) {
+      event.preventDefault(
+        console.log(event.target.dataset)
+      )
+    })
+  })
+  {% comment %} const csrfToken = document.querySelector('input[name=csrfmiddlewaretoken]').value // 속성에 대해 명시하려면 [] 
+
+  followForm.addEventListener('submit', function (event) {
+    event.preventDefault()
+    const userId = event.target.dataset.userId
+    // followForm = this = event.target 다 같은거라 위에다 암거나 쓰면 됨
+    
+    // 요청을 하기위해 필요한 정보들을 키/벨류 형태로 줌
+    const requestInfo = {
+      url: `/articles/${articlesId}/likes/`,
+      method: 'POST', // csrf_token 보내야 403 error 안 뜸
+      headers: {'X-CSRFToken': csrfToken,},
+      data: {},
+    }
+    axios(requestInfo)
+      .then(res => {
+        console.log(res.data)
+        const isFollowed= res.data.is_followed
+        followBnt = isFollowed ? '언팔로우' : '팔로우' // 삼항 연산을 적음 , if else로 써 도 됨
+      
+        const followersCount = res.data.followers_count
+        const followingsCount = res.data.followings_count
+        const followersCountTag = document.querSelector('#followers-count')
+        const followingsCountTag = document.querSelector('#followings-count')
+
+        followersCountTag.innerText = followersCount
+        followingsCountTag.innerText = followingsCount
+      })
+
+      .catch(err => {
+        console.log(err)
+      })
+    // 서버에 요청
+    // url: /accounts/${userId}/follow/
+    // method: POST
+    // data: 
+
+  }) {% endcomment %}
+
+</script>
+{% endblock script %}

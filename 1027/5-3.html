@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+</head>
+<body>
+    <h1>영화 목록</h1>
+    <button>추천 영화 보기</button>
+    <p></p>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <script>
+        
+        const BASE_URL = 'https://api.themoviedb.org/3/movie/popular'
+        const Btn = document.querySelector('button')
+        const pTag = document.querySelector('p')
+        
+    Btn.addEventListener('click', function (event) {
+        axios({
+            url: BASE_URL,
+            method: 'get',
+            // post는 data
+            // get는 apramiter
+            params: {
+                api_key: '7f1cec35eda90e95bd4840f197f3186c', 
+                language: 'ko-KR',
+                page: 1,
+            },
+        })
+        
+        .then(res => {
+            console.log(res)
+            
+            for(i=0; i<5; i++) {
+                const Li = document.createElement('li')
+                const movie = res.data.results[i].title
+                Li.innerText = movie
+                pTag.appendChild(Li)
+                console.log(movie)
+            }
+            Btn.setAttribute('disabled', 'disabled')
+        })
+    })
+    </script>
+</body>
+</html>

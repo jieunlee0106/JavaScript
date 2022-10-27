@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+  <h1>{{ person.username }}님의 프로필</h1>
+  <div>
+    팔로워 : <span id="followers-count">{{ person.followers.all|length }} </span>
+    / 팔로잉 : <span id="followings-count">{{ person.followings.all|length }}</span>
+  </div>
+
+
+  {% if request.user != person %}
+  <div>
+    <form id='follow-form' data-user-id="{{ person.pk }}">
+      {% csrf_token %}
+      {% if request.user in person.followers.all %}
+        <input type="submit" value="언팔로우">
+      {% else %}
+        <input type="submit" value="팔로우">
+      {% endif %}
+    </form>
+  <div>
+  {% endif %}
+
+  <h2>{{ person.username }}이 작성한 모든 게시글</h2>
+  {% for article in person.article_set.all %}
+    <div>{{ article.title }}</div>
+  {% endfor %}
+
+  <hr>
+
+  <h2>{{ person.username }}이 작성한 모든 댓글</h2>
+  {% for comment in person.comment_set.all %}
+    <div>{{ comment.content }}</div>
+  {% endfor %}
+
+  <hr>
+
+  <h2>{{ person.username }}이 좋아요 한 모든 게시글</h2>
+  {% for article in person.like_articles.all %}
+    <div>{{ article.title }}</div>
+  {% endfor %}
+
+  <a href="{% url 'articles:index' %}">back</a>
+
+{% endblock content %}
+
+{% block script %}
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+  const followForm = document.querySelector('#follow-form') 
+  const csrfToken = document.querySelector('input[name=csrfmiddlewaretoken]').value // 속성에 대해 명시하려면 [] 
+
+  followForm.addEventListener('submit', function (event) {
+    event.preventDefault()
+    const userId = event.target.dataset.userId
+    // followForm = this = event.target 다 같은거라 위에다 암거나 쓰면 됨
+    
+    // 요청을 하기위해 필요한 정보들을 키/벨류 형태로 줌
+    const requestInfo = {
+      url: `/accounts/${userId}/follow/`,
+      method: 'POST', // csrf_token 보내야 403 error 안 뜸
+      headers: {'X-CSRFToken': csrfToken,},
+      data: {},
+    }
+    axios(requestInfo)
+      .then(res => {
+        console.log(res.data)
+        const isFollowed= res.data.is_followed
+        followBnt = isFollowed ? '언팔로우' : '팔로우' // 삼항 연산을 적음 , if else로 써 도 됨
+      
+        const followersCount = res.data.followers_count
+        const followingsCount = res.data.followings_count
+        const followersCountTag = document.querSelector('#followers-count')
+        const followingsCountTag = document.querSelector('#followings-count')
+
+        followersCountTag.innerText = followersCount
+        followingsCountTag.innerText = followingsCount
+      })
+
+      .catch(err => {
+        console.log(err)
+      })
+    // 서버에 요청
+    // url: /accounts/${userId}/follow/
+    // method: POST
+    // data: 
+
+  })
+
+</script>
+{% endblock script %}
